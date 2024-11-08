@@ -1,60 +1,119 @@
-import { TrendingUp, TrendingDown, Wallet, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { IndianRupee, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { transactionService } from '../../services/api';
 
-const stats = [
-  {
-    name: 'Total Income',
-    value: '₹82,400',
-    change: '+14.5%',
-    trend: 'up',
-    icon: TrendingUp,
-  },
-  {
-    name: 'Total Expenses',
-    value: '₹45,200',
-    change: '-8.2%',
-    trend: 'down',
-    icon: TrendingDown,
-  },
-  {
-    name: 'Current Balance',
-    value: '₹37,200',
-    change: '+21.3%',
-    trend: 'up',
-    icon: Wallet,
-  },
-  {
-    name: 'Savings Goal',
-    value: '68%',
-    change: '₹42,800 / ₹63,000',
-    trend: 'neutral',
-    icon: Target,
-  },
-];
+interface Stats {
+  totalBalance: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
+  monthlySavings: number;
+}
 
 export default function StatsBar() {
+  const [stats, setStats] = useState<Stats>({
+    totalBalance: 0,
+    monthlyIncome: 0,
+    monthlyExpense: 0,
+    monthlySavings: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await transactionService.getTransactions();
+        // Calculate stats from transactions
+        // This is a simplified version - you might want to add more complex calculations
+        const transactions = response.data;
+        const income = transactions
+          .filter((t: any) => t.category.type === 'INCOME')
+          .reduce((sum: number, t: any) => sum + t.amount, 0);
+        const expense = transactions
+          .filter((t: any) => t.category.type === 'EXPENSE')
+          .reduce((sum: number, t: any) => sum + t.amount, 0);
+        
+        setStats({
+          totalBalance: income - expense,
+          monthlyIncome: income,
+          monthlyExpense: expense,
+          monthlySavings: income - expense,
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const stats_items = [
+    {
+      title: 'Total Balance',
+      value: stats.totalBalance,
+      icon: Wallet,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+    },
+    {
+      title: 'Monthly Income',
+      value: stats.monthlyIncome,
+      icon: TrendingUp,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+    },
+    {
+      title: 'Monthly Expense',
+      value: stats.monthlyExpense,
+      icon: TrendingDown,
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
+    },
+    {
+      title: 'Monthly Savings',
+      value: stats.monthlySavings,
+      icon: IndianRupee,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+    },
+  ];
+
+  if (loading) {
+    return <div>Loading stats...</div>;
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 px-4 py-6">
-      {stats.map((stat) => (
-        <div
-          key={stat.name}
-          className="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6"
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {stats_items.map((item, index) => (
+        <motion.div
+          key={item.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+          className="bg-white overflow-hidden rounded-lg shadow"
         >
-          <dt>
-            <div className="absolute rounded-md bg-indigo-100 p-3">
-              <stat.icon className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className={`flex-shrink-0 ${item.bgColor} rounded-md p-3`}>
+                <item.icon className={`h-6 w-6 ${item.color}`} />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    {item.title}
+                  </dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-gray-900">
+                      ₹{item.value.toLocaleString('en-IN')}
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </div>
-            <p className="ml-16 truncate text-sm font-medium text-gray-500">{stat.name}</p>
-          </dt>
-          <dd className="ml-16 flex items-baseline">
-            <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-            <p className={`ml-2 flex items-baseline text-sm font-semibold ${
-              stat.trend === 'up' ? 'text-green-600' : 
-              stat.trend === 'down' ? 'text-red-600' : 'text-gray-600'
-            }`}>
-              {stat.change}
-            </p>
-          </dd>
-        </div>
+          </div>
+        </motion.div>
       ))}
     </div>
   );

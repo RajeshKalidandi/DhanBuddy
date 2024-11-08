@@ -1,39 +1,131 @@
-import { PieChart, DollarSign, ShoppingCart, Home, Car, Heart, Coffee, Smartphone } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { transactionService } from '../../services/api';
 
-const categories = [
-  { name: 'Housing', amount: 18500, icon: Home, color: 'bg-blue-500' },
-  { name: 'Transportation', amount: 8200, icon: Car, color: 'bg-green-500' },
-  { name: 'Healthcare', amount: 6400, icon: Heart, color: 'bg-red-500' },
-  { name: 'Food & Dining', amount: 5600, icon: Coffee, color: 'bg-yellow-500' },
-  { name: 'Entertainment', amount: 3800, icon: Smartphone, color: 'bg-purple-500' },
-];
+interface ChartData {
+  name: string;
+  value: number;
+  color: string;
+}
 
 export default function ExpenseChart() {
-  return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Expense Categories</h2>
-          <PieChart className="h-5 w-5 text-gray-500" />
-        </div>
+  const [data, setData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        const response = await transactionService.getTransactions();
+        const transactions = response.data;
         
-        <div className="space-y-4">
-          {categories.map((category) => (
-            <div key={category.name} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${category.color}`}>
-                  <category.icon className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-medium text-gray-700">{category.name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-gray-500" />
-                <span className="font-semibold">₹{category.amount.toLocaleString()}</span>
-              </div>
+        // Group expenses by category
+        const expensesByCategory = transactions
+          .filter((t: any) => t.category.type === 'EXPENSE')
+          .reduce((acc: any, t: any) => {
+            const categoryName = t.category.name;
+            if (!acc[categoryName]) {
+              acc[categoryName] = {
+                value: 0,
+                color: t.category.color,
+              };
+            }
+            acc[categoryName].value += t.amount;
+            return acc;
+          }, {});
+
+        // Transform data for chart
+        const chartData = Object.entries(expensesByCategory).map(([name, data]: [string, any]) => ({
+          name,
+          value: data.value,
+          color: data.color,
+        }));
+
+        setData(chartData);
+      } catch (err) {
+        setError('Failed to load expense data');
+        console.error('Error fetching expenses:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExpenses();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow h-96 flex items-center justify-center">
+        <div className="text-gray-500">Loading expense data...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow h-96 flex items-center justify-center">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white p-6 rounded-lg shadow"
+    >
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        Expense Breakdown
+      </h2>
+      
+      {data.length === 0 ? (
+        <div className="h-80 flex items-center justify-center text-gray-500">
+          No expense data available
+        </div>
+      ) : (
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Amount']}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-sm">
+            <div className="text-gray-500">Total Expenses</div>
+            <div className="text-lg font-semibold text-gray-900">
+              ₹{data.reduce((sum, item) => sum + item.value, 0).toLocaleString('en-IN')}
             </div>
-          ))}
+          </div>
+          <div className="text-sm">
+            <div className="text-gray-500">Categories</div>
+            <div className="text-lg font-semibold text-gray-900">
+              {data.length}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

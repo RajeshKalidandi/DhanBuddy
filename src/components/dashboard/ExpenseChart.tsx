@@ -18,6 +18,7 @@ interface ExpenseData {
 export default function ExpenseChart() {
   const [data, setData] = useState<ExpenseData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchExpenseData();
@@ -27,14 +28,15 @@ export default function ExpenseChart() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/transactions/expense-summary/`,
+        `${import.meta.env.VITE_API_URL}/api/transactions/stats/expense-summary/`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      setData(response.data);
+      setData(response.data || []);
     } catch (error) {
       console.error('Failed to fetch expense data:', error);
+      setError('Failed to load expense data');
     } finally {
       setLoading(false);
     }
@@ -52,6 +54,14 @@ export default function ExpenseChart() {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6 h-[400px] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6 h-[400px] flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }

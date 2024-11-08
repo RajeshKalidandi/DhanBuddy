@@ -9,9 +9,9 @@ const Register = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    confirm_password: '',
+    first_name: '',
+    last_name: '',
   });
   const [error, setError] = useState('');
 
@@ -26,19 +26,13 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirm_password) {
       setError('Passwords do not match');
       return;
     }
 
     try {
-      await register({
-        email: formData.email,
-        password: formData.password,
-        confirm_password: formData.confirmPassword,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-      });
+      await register(formData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     }
@@ -83,24 +77,24 @@ const Register = () => {
                 <div className="relative flex-1">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <input
-                    name="firstName"
+                    name="first_name"
                     type="text"
                     required
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                     placeholder="First Name"
-                    value={formData.firstName}
+                    value={formData.first_name}
                     onChange={handleChange}
                   />
                 </div>
                 <div className="relative flex-1">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <input
-                    name="lastName"
+                    name="last_name"
                     type="text"
                     required
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                     placeholder="Last Name"
-                    value={formData.lastName}
+                    value={formData.last_name}
                     onChange={handleChange}
                   />
                 </div>
@@ -135,12 +129,12 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
-                  name="confirmPassword"
+                  name="confirm_password"
                   type="password"
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                   placeholder="Confirm Password"
-                  value={formData.confirmPassword}
+                  value={formData.confirm_password}
                   onChange={handleChange}
                 />
               </div>

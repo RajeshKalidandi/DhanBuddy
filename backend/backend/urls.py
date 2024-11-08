@@ -16,13 +16,33 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.documentation import include_docs_urls
-from rest_framework.permissions import AllowAny
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.views.generic import RedirectView
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="DhanBuddy API",
+        default_version='v1',
+        description="API documentation for DhanBuddy personal finance management",
+        terms_of_service="https://www.dhanbuddy.com/terms/",
+        contact=openapi.Contact(email="contact@dhanbuddy.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+    authentication_classes=(),
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path('api/transactions/', include('transactions.urls')),
     path('api/goals/', include('goals.urls')),
-    path('', include_docs_urls(title='DhanBuddy API', permission_classes=[AllowAny])),
+    # Swagger documentation URLs
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    # Root URL redirects to Swagger UI
+    path('', RedirectView.as_view(url='swagger/', permanent=False), name='api-root'),
 ]

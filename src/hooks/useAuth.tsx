@@ -9,12 +9,20 @@ interface User {
   last_name: string;
 }
 
+interface RegisterData {
+  email: string;
+  password: string;
+  confirm_password: string;
+  first_name: string;
+  last_name: string;
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: any) => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -65,15 +73,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (userData: any) => {
+  const register = async (userData: RegisterData) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register/`, userData);
-      localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
-      navigate('/dashboard');
+      console.log('Sending registration data:', userData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/register/`, 
+        userData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        setUser(response.data.user);
+        navigate('/dashboard');
+      } else {
+        throw new Error('Registration successful but no token received');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error('Registration error:', err.response?.data);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error ||
+                          'Registration failed';
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);

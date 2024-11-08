@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, ArrowRight, Smartphone, Shield, Target, Rocket } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth.tsx';
+import { Link } from 'react-router-dom';
 
 const steps = [
   {
@@ -50,23 +49,8 @@ const itemVariants = {
 };
 
 export default function Onboarding() {
-  const navigate = useNavigate();
-  const { user, loading } = useAuth();
-
-  const handleCreateAccount = () => {
-    if (loading) return;
-    
-    // If user is logged in, go to dashboard
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      // If not logged in, go to registration
-      navigate('/register');
-    }
-  };
-
   return (
-    <div className="relative bg-gradient-to-b from-indigo-50 to-white py-24 sm:py-32 overflow-hidden">
+    <section id="how-it-works" className="relative bg-gradient-to-b from-indigo-50 to-white py-24 sm:py-32 overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <svg className="absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/4" width="800" height="800" fill="none" viewBox="0 0 800 800">
@@ -88,7 +72,7 @@ export default function Onboarding() {
           className="text-center max-w-2xl mx-auto mb-20"
         >
           <h2 className="text-base font-semibold leading-7 text-indigo-600">
-            Get Started in Minutes
+            How It Works
           </h2>
           <p className="mt-2 text-4xl font-bold tracking-tight text-gray-900">
             Your Journey to Financial Freedom
@@ -140,24 +124,36 @@ export default function Onboarding() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-16 flex justify-center"
+          className="mt-16 flex justify-center space-x-4"
         >
-          <button
-            onClick={handleCreateAccount}
-            disabled={loading}
-            className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          <Link
+            to="/register"
+            className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors"
           >
-            {loading ? (
-              'Loading...'
-            ) : user ? (
-              'Go to Dashboard'
-            ) : (
-              'Create Free Account'
-            )}
+            Start Your Journey
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </Link>
+          <Link
+            to="/login"
+            className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:border-indigo-600 hover:text-indigo-600 transition-colors"
+          >
+            Sign In
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 text-center"
+        >
+          <p className="text-sm text-gray-500">
+            Already using DhanBuddy? <Link to="/login" className="text-indigo-600 hover:text-indigo-500">Sign in to your account</Link>
+          </p>
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 }

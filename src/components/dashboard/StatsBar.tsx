@@ -1,7 +1,6 @@
-import { motion } from 'framer-motion';
-import { IndianRupee, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { transactionService } from '../../services/api';
+import axios from 'axios';
 
 interface Stats {
   totalBalance: number;
@@ -17,103 +16,75 @@ export default function StatsBar() {
     monthlyExpense: 0,
     monthlySavings: 0,
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await transactionService.getTransactions();
-        // Calculate stats from transactions
-        // This is a simplified version - you might want to add more complex calculations
-        const transactions = response.data;
-        const income = transactions
-          .filter((t: any) => t.category.type === 'INCOME')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-        const expense = transactions
-          .filter((t: any) => t.category.type === 'EXPENSE')
-          .reduce((sum: number, t: any) => sum + t.amount, 0);
-        
-        setStats({
-          totalBalance: income - expense,
-          monthlyIncome: income,
-          monthlyExpense: expense,
-          monthlySavings: income - expense,
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/transactions/stats/`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
+        setStats(response.data);
       } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setLoading(false);
+        console.error('Failed to fetch stats:', error);
       }
     };
 
     fetchStats();
   }, []);
 
-  const stats_items = [
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const stats_data = [
     {
       title: 'Total Balance',
-      value: stats.totalBalance,
+      amount: stats.totalBalance,
       icon: Wallet,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
+      color: 'bg-blue-100 text-blue-600',
     },
     {
       title: 'Monthly Income',
-      value: stats.monthlyIncome,
+      amount: stats.monthlyIncome,
       icon: TrendingUp,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
+      color: 'bg-green-100 text-green-600',
     },
     {
       title: 'Monthly Expense',
-      value: stats.monthlyExpense,
+      amount: stats.monthlyExpense,
       icon: TrendingDown,
-      color: 'text-red-600',
-      bgColor: 'bg-red-100',
+      color: 'bg-red-100 text-red-600',
     },
     {
       title: 'Monthly Savings',
-      value: stats.monthlySavings,
-      icon: IndianRupee,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
+      amount: stats.monthlySavings,
+      icon: PiggyBank,
+      color: 'bg-purple-100 text-purple-600',
     },
   ];
 
-  if (loading) {
-    return <div>Loading stats...</div>;
-  }
-
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {stats_items.map((item, index) => (
-        <motion.div
-          key={item.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          className="bg-white overflow-hidden rounded-lg shadow"
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats_data.map((stat) => (
+        <div
+          key={stat.title}
+          className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
         >
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className={`flex-shrink-0 ${item.bgColor} rounded-md p-3`}>
-                <item.icon className={`h-6 w-6 ${item.color}`} />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    {item.title}
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">
-                      ₹{item.value.toLocaleString('en-IN')}
-                    </div>
-                  </dd>
-                </dl>
-              </div>
+          <div className="flex items-center space-x-4">
+            <div className={`p-3 rounded-lg ${stat.color}`}>
+              <stat.icon className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">{stat.title}</p>
+              <p className="text-2xl font-semibold">{formatCurrency(stat.amount)}</p>
             </div>
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

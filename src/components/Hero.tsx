@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { IndianRupee, Wallet, TrendingUp, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,13 +49,19 @@ export default function Hero() {
           </motion.div>
 
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors">
-              Start Free Trial
+            <Link
+              to="/register"
+              className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors"
+            >
+              Get Started Free
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-gray-700 bg-white rounded-xl border-2 border-gray-200 hover:border-indigo-600 hover:text-indigo-600 transition-colors">
-              Watch Demo
-            </button>
+            </Link>
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-gray-700 bg-white rounded-xl border-2 border-gray-200 hover:border-indigo-600 hover:text-indigo-600 transition-colors"
+            >
+              Sign In
+            </Link>
           </motion.div>
 
           <motion.div variants={itemVariants} className="pt-8">
@@ -123,6 +130,7 @@ export default function Hero() {
                 transition={{ delay: 0.8 }}
                 className="relative rounded-2xl overflow-hidden shadow-2xl"
               >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </motion.div>
             </div>
           </motion.div>

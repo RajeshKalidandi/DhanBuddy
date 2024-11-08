@@ -16,26 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.documentation import include_docs_urls
-from rest_framework.schemas import get_schema_view
 from rest_framework.permissions import AllowAny
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/accounts/', include('accounts.urls')),
+    path('api/auth/', include('accounts.urls')),
     path('api/transactions/', include('transactions.urls')),
     path('api/goals/', include('goals.urls')),
-    path('', include_docs_urls(
-        title='DhanBuddy API',
-        permission_classes=[AllowAny]
-    )),
-    path('schema/', get_schema_view(
-        title="DhanBuddy API",
-        description="API for DhanBuddy Personal Finance App",
-        version="1.0.0",
-        permission_classes=[AllowAny]
-    ), name='openapi-schema'),
+    path('', include_docs_urls(title='DhanBuddy API', permission_classes=[AllowAny])),
 ]

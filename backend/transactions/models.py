@@ -17,23 +17,22 @@ class Category(models.Model):
         return f"{self.name} ({self.type})"
 
 class Transaction(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='transactions'
-    )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.PROTECT,
-        related_name='transactions'
-    )
+    TRANSACTION_TYPES = [
+        ('EXPENSE', 'Expense'),
+        ('INCOME', 'Income'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    description = models.CharField(max_length=200)
+    transaction_type = models.CharField(max_length=7, choices=TRANSACTION_TYPES)
+    category = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
     date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.email}'s {self.transaction_type}: ₹{self.amount}"
 
     class Meta:
         ordering = ['-date', '-created_at']
-
-    def __str__(self):
-        return f"{self.category.name}: ₹{self.amount} on {self.date}"

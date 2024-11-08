@@ -1,30 +1,27 @@
-import { motion } from 'framer-motion';
+import { Routes, Route } from 'react-router-dom';
 import Header from './Header';
 import StatsBar from './StatsBar';
 import ExpenseChart from './ExpenseChart';
 import TransactionList from './TransactionList';
+import { useAuth } from '../../hooks/useAuth.tsx';
 
 export default function Dashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          <StatsBar />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <ExpenseChart />
-            </div>
-            <div className="lg:col-span-2">
-              <TransactionList />
-            </div>
-          </div>
-        </motion.div>
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-8">
+          Welcome back, {user?.first_name}!
+        </h1>
+        
+        <StatsBar />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          <ExpenseChart />
+          <TransactionList />
+        </div>
       </main>
     </div>
   );

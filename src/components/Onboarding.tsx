@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, ArrowRight, Smartphone, Shield, Target, Rocket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth.tsx';
 
 const steps = [
   {
@@ -51,9 +51,11 @@ const itemVariants = {
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const handleCreateAccount = () => {
+    if (loading) return;
+    
     // If user is logged in, go to dashboard
     if (user) {
       navigate('/dashboard');
@@ -142,9 +144,16 @@ export default function Onboarding() {
         >
           <button
             onClick={handleCreateAccount}
-            className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors"
+            disabled={loading}
+            className="group inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {user ? 'Go to Dashboard' : 'Create Free Account'}
+            {loading ? (
+              'Loading...'
+            ) : user ? (
+              'Go to Dashboard'
+            ) : (
+              'Create Free Account'
+            )}
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </motion.div>

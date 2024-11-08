@@ -48,6 +48,19 @@ DhanBuddy is a modern, AI-powered personal finance application designed specific
 - SQLite (Development) / PostgreSQL (Production)
 - Django Filters
 
+### AI Features
+- OpenAI GPT for financial insights
+- Machine Learning models for expense categorization
+- Predictive analytics for spending patterns
+- Custom NLP for Indian context understanding
+
+### Security
+- HTTPS encryption
+- Data encryption at rest
+- Regular security audits
+- GDPR and PDPA compliance
+- Multi-factor authentication
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -90,6 +103,20 @@ python manage.py createsuperuser
 
 # Start development server
 python manage.py runserver
+```
+
+## 🔐 Environment Setup
+
+```bash
+# Frontend (.env)
+VITE_API_URL=http://localhost:8000
+VITE_AI_API_KEY=your_openai_key
+
+# Backend (.env)
+SECRET_KEY=your_django_secret_key
+DEBUG=True
+DATABASE_URL=your_database_url
+ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
 ## 📝 API Documentation

@@ -1,45 +1,27 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import User
 
-class UserSerializer(serializers.ModelSerializer):
+User = get_user_model()
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'phone', 'monthly_income', 'profile_picture', 'password')
-        read_only_fields = ('id',)
-        extra_kwargs = {
-            'email': {'required': True},
-            'phone': {'required': True},
-        }
+        fields = ('email', 'password', 'confirm_password', 'first_name', 'last_name')
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            phone=validated_data.get('phone', ''),
-            monthly_income=validated_data.get('monthly_income', 0),
-            password=validated_data['password']
-        )
+        validated_data.pop('confirm_password')
+        user = User.objects.create_user(**validated_data)
         return user
 
-class PasswordResetSerializer(serializers.Serializer):
+class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    token = serializers.CharField()
-    new_password = serializers.CharField(write_only=True)
-
-    def validate_new_password(self, value):
-        validate_password(value)
-        return value 
-
-class PasswordChangeSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True)
-
-    def validate_new_password(self, value):
-        validate_password(value)
-        return value 
+    password = serializers.CharField()

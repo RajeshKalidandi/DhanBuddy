@@ -1,4 +1,4 @@
-# DhanBuddy - Your AI-Powered Financial Companion 🚀
+# DhanBuddy - AI-Powered Personal Finance App 🚀
 
 ![DhanBuddy Logo](/public/images/DhanBuddy.png)
 
@@ -7,95 +7,111 @@ DhanBuddy is a modern, AI-powered personal finance application designed specific
 ## 🌟 Features
 
 ### Landing Page
-![Landing Page](/public/images/DhanBuddy-landingpage.png)
-
-- ✨ Modern, animated hero section
-- 📱 Fully responsive design
+- ✨ Modern, animated hero section with Framer Motion
+- 📱 Fully responsive design with Tailwind CSS
 - 🎯 Clear value proposition
-- 🇮🇳 India-focused content and currency
+- 🇮🇳 India-focused content and currency formatting
+
+### Authentication
+- 🔐 JWT-based secure authentication
+- 📝 User registration with validation
+- 🔑 Password reset functionality
+- 🛡️ Protected routes
 
 ### Dashboard
-![Dashboard](/public/images/DhanBuddyLandingpage.png)
-
-- 📊 Interactive expense charts
+- 📊 Interactive expense charts with Recharts
 - 💰 Real-time transaction tracking
-- 📈 Financial statistics
+- 📈 Financial statistics and insights
 - 🔍 Advanced search and filtering
+- 📱 Responsive layout for all devices
 
-### Onboarding Experience
-![Onboarding](/public/images/DhanBuddyOnboardingpage.png)
-
-- 🚀 Smooth user onboarding
-- 📝 Step-by-step guidance
-- 🎨 Intuitive interface
-- 🔒 Secure setup process
+### Backend API
+- 🔄 RESTful API with Django REST Framework
+- 🎯 Custom user model with extended fields
+- 📁 Transaction and category management
+- 🎯 Goals tracking system
+- 📚 API documentation with Swagger/OpenAPI
 
 ## 🛠️ Tech Stack
 
-- React + TypeScript
-- Tailwind CSS
-- Framer Motion
-- Lucide Icons
-- Modern JavaScript features
+### Frontend
+- React 18 with TypeScript
+- Tailwind CSS for styling
+- Framer Motion for animations
+- Recharts for data visualization
+- Axios for API calls
 
-## 🏗️ Project Structure
+### Backend
+- Django 5.1 with Python 3.10
+- Django REST Framework
+- JWT Authentication
+- SQLite (Development) / PostgreSQL (Production)
+- Django Filters
 
-src/
-├── components/
-│ ├── Hero.tsx
-│ ├── Features.tsx
-│ ├── Onboarding.tsx
-│ ├── Testimonials.tsx
-│ ├── FAQ.tsx
-│ ├── Footer.tsx
-│ └── dashboard/
-│ ├── Header.tsx
-│ ├── StatsBar.tsx
-│ ├── ExpenseChart.tsx
-│ └── TransactionList.tsx
-└── App.tsx
+## 🚀 Getting Started
 
+### Prerequisites
+- Node.js >= 16
+- Python >= 3.10
+- Git
 
-## 🚀 Progress
+### Installation
 
-✅ Completed:
-- Landing page implementation
-- Dashboard UI components
-- Responsive design
-- Animation integration
-- State management
-- Navigation setup
-- Component architecture
-
-🔄 In Progress:
-- SEO optimizations
-- Performance improvements
-- Additional features
-
-## 🏃‍♂️ Getting Started
-
-1. Clone the repository:
+1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/dhanbuddy.git
-```
-
-2. Install dependencies:
-```bash
 cd dhanbuddy
-npm install
 ```
 
-3. Start the development server:
+2. Frontend Setup
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
+3. Backend Setup
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Create superuser
+python manage.py createsuperuser
+
+# Start development server
+python manage.py runserver
+```
+
+## 📝 API Documentation
+
+Access the API documentation at:
+- Swagger UI: http://localhost:8000/
+- API Endpoints: http://localhost:8000/schema/
+
+## 🔜 Upcoming Features
+
+- [ ] Email verification for new users
+- [ ] Social authentication (Google, Facebook)
+- [ ] Transaction analytics and insights
+- [ ] PDF report generation
+- [ ] Notification system
+- [ ] Budget planning tools
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📝 License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

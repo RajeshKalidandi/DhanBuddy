@@ -8,6 +8,7 @@ from django_filters import rest_framework as filters
 from .models import Transaction, Category, EMI
 from .serializers import TransactionSerializer, CategorySerializer, EMISerializer
 from drf_yasg.utils import swagger_auto_schema
+from notifications.services import NotificationService
 
 class TransactionFilter(filters.FilterSet):
     min_amount = filters.NumberFilter(field_name="amount", lookup_expr='gte')
@@ -33,7 +34,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return Transaction.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        transaction = serializer.save(user=self.request.user)
+        NotificationService.send_transaction_alert(self.request.user, transaction)
 
     @action(detail=False, methods=['get'])
     def stats(self, request):
@@ -127,4 +129,6 @@ class EMIViewSet(viewsets.ModelViewSet):
         return EMI.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        emi = serializer.save(user=self.request.user)
+        if emi.should_send_reminder():
+            NotificationService.send_emi_reminder(self.request.user, emi)

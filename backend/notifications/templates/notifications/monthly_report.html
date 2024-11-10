@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .stat { font-size: 24px; color: #4F46E5; font-weight: bold; }
+        .footer { text-align: center; padding: 20px; color: #666; }
+        .summary-box {
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Monthly Financial Report</h1>
+            <p>{{ month }}</p>
+        </div>
+        <div class="content">
+            <p>Dear {{ user.first_name }},</p>
+            <p>Here's your monthly financial summary:</p>
+            
+            <div class="summary-box">
+                <div class="stat-row">
+                    <span>Total Income:</span>
+                    <span class="stat">₹{{ stats.monthly_income|floatformat:2 }}</span>
+                </div>
+                <div class="stat-row">
+                    <span>Total Expenses:</span>
+                    <span class="stat">₹{{ stats.monthly_expense|floatformat:2 }}</span>
+                </div>
+                <div class="stat-row">
+                    <span>Net Savings:</span>
+                    <span class="stat">₹{{ stats.monthly_savings|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <p>View your detailed report on the dashboard for more insights.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from DhanBuddy. Please do not reply to this email.</p>
+            <p>© {% now "Y" %} DhanBuddy. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',  # This should be first among local apps
     'goals.apps.GoalsConfig',
     'transactions.apps.TransactionsConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 # Add CORS settings

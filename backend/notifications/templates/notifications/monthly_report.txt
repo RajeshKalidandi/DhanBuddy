@@ -1,0 +1,14 @@
+Dear {{ user.first_name }},
+
+Here's your monthly financial report for {{ month }}.
+
+Financial Summary:
+-----------------
+Total Income: ₹{{ stats.monthly_income|floatformat:2 }}
+Total Expenses: ₹{{ stats.monthly_expense|floatformat:2 }}
+Net Savings: ₹{{ stats.monthly_savings|floatformat:2 }}
+
+View your detailed report on the dashboard for more insights.
+
+Best regards,
+DhanBuddy Team

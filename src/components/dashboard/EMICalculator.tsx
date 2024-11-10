@@ -29,6 +29,11 @@ export default function EMICalculator({ isOpen, onClose, onEMIAdded }: EMICalcul
   const [error, setError] = useState<string | null>(null);
 
   const calculateEMI = () => {
+    if (!formData.loanAmount || !formData.interestRate || !formData.tenure) {
+      setError('Please fill in all fields');
+      return;
+    }
+
     const P = parseFloat(formData.loanAmount);
     const R = parseFloat(formData.interestRate) / 12 / 100;
     const N = parseFloat(formData.tenure) * 12;
@@ -42,6 +47,7 @@ export default function EMICalculator({ isOpen, onClose, onEMIAdded }: EMICalcul
       totalInterest: Math.round(totalInterest),
       totalAmount: Math.round(totalAmount),
     });
+    setError(null);
   };
 
   const handleSave = async () => {
@@ -55,6 +61,9 @@ export default function EMICalculator({ isOpen, onClose, onEMIAdded }: EMICalcul
 
     try {
       const token = localStorage.getItem('token');
+      const nextPaymentDate = new Date(formData.startDate);
+      nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/transactions/emis/`,
         {
@@ -67,18 +76,30 @@ export default function EMICalculator({ isOpen, onClose, onEMIAdded }: EMICalcul
           total_interest: result.totalInterest,
           total_amount: result.totalAmount,
           start_date: formData.startDate,
-          next_payment_date: formData.startDate, // First payment date
+          next_payment_date: nextPaymentDate.toISOString().split('T')[0],
         },
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      onEMIAdded?.();
+      if (onEMIAdded) {
+        onEMIAdded();
+      }
+      
+      setFormData({
+        loanAmount: '',
+        interestRate: '',
+        tenure: '',
+        emiName: '',
+        loanType: 'HOME',
+        startDate: new Date().toISOString().split('T')[0],
+      });
+      setResult(null);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save EMI:', error);
-      setError('Failed to save EMI. Please try again.');
+      setError(error.response?.data?.message || 'Failed to save EMI. Please try again.');
     } finally {
       setSaving(false);
     }

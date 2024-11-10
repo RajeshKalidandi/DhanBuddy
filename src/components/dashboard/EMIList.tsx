@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { IndianRupee, Calendar } from 'lucide-react';
+import { IndianRupee, Calendar, AlertCircle } from 'lucide-react';
 
 interface EMI {
   id: number;
   name: string;
   loan_type: string;
+  loan_amount: number;
   emi_amount: number;
   next_payment_date: string;
   next_payment_in_days: number;
@@ -22,10 +23,6 @@ export default function EMIList() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
 
-  useEffect(() => {
-    fetchEMIs();
-  }, []);
-
   const fetchEMIs = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -35,7 +32,9 @@ export default function EMIList() {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      setEmis(Array.isArray(response.data) ? response.data : []);
+      console.log('EMIs fetched:', response.data);
+      const emisData = response.data.results || [];
+      setEmis(Array.isArray(emisData) ? emisData : []);
     } catch (error) {
       console.error('Failed to fetch EMIs:', error);
       setError('Failed to load EMIs');
@@ -45,13 +44,19 @@ export default function EMIList() {
     }
   };
 
-  const activeEMIs = Array.isArray(emis) 
-    ? emis.filter(emi => emi.progress_percentage < 100)
-    : [];
-  
-  const completedEMIs = Array.isArray(emis)
-    ? emis.filter(emi => emi.progress_percentage >= 100)
-    : [];
+  useEffect(() => {
+    fetchEMIs();
+  }, [activeTab]);
+
+  const activeEMIs = emis.filter(emi => {
+    const progressPercentage = emi.progress_percentage || 0;
+    return progressPercentage < 100;
+  });
+
+  const completedEMIs = emis.filter(emi => {
+    const progressPercentage = emi.progress_percentage || 0;
+    return progressPercentage >= 100;
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -59,6 +64,14 @@ export default function EMIList() {
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
   };
 
   if (loading) {
@@ -79,10 +92,15 @@ export default function EMIList() {
   if (error) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <p className="text-red-500 text-center">{error}</p>
+        <div className="flex items-center justify-center text-red-500 gap-2">
+          <AlertCircle className="h-5 w-5" />
+          <p>{error}</p>
+        </div>
       </div>
     );
   }
+
+  const displayEMIs = activeTab === 'active' ? activeEMIs : completedEMIs;
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
@@ -113,10 +131,17 @@ export default function EMIList() {
       </div>
       
       <div className="space-y-4">
-        {!Array.isArray(emis) || emis.length === 0 ? (
-          <p className="text-center text-gray-500 py-4">No EMIs found</p>
+        {displayEMIs.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No {activeTab} EMIs found</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {activeTab === 'active' 
+                ? 'Add a new EMI to start tracking your loans'
+                : 'Complete your active EMIs to see them here'}
+            </p>
+          </div>
         ) : (
-          (activeTab === 'active' ? activeEMIs : completedEMIs).map((emi) => (
+          displayEMIs.map((emi) => (
             <motion.div
               key={emi.id}
               initial={{ opacity: 0, y: 20 }}
@@ -138,8 +163,8 @@ export default function EMIList() {
               
               <div className="mt-4">
                 <div className="flex justify-between text-sm text-gray-500 mb-1">
-                  <span>Total Progress</span>
-                  <span>{emi.progress_percentage}%</span>
+                  <span>Progress</span>
+                  <span>{emi.progress_percentage.toFixed(1)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -151,19 +176,23 @@ export default function EMIList() {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <div className="flex items-center text-gray-500">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  Next payment in {emi.next_payment_in_days} days
+              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                <div className="text-gray-500">
+                  <p>Loan Amount: {formatCurrency(emi.loan_amount)}</p>
+                  <p>Total Interest: {formatCurrency(emi.total_interest)}</p>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  emi.next_payment_in_days <= 7
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {emi.next_payment_in_days <= 7 ? 'Due Soon' : 'On Track'}
-                </span>
+                <div className="text-right text-gray-500">
+                  <p>Start Date: {formatDate(emi.start_date)}</p>
+                  <p>Next Payment: {formatDate(emi.next_payment_date)}</p>
+                </div>
               </div>
+
+              {emi.next_payment_in_days <= 7 && activeTab === 'active' && (
+                <div className="mt-4 bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  Payment due in {emi.next_payment_in_days} days
+                </div>
+              )}
             </motion.div>
           ))
         )}

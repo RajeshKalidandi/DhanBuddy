@@ -1,0 +1,12 @@
+Dear {{ user.first_name }},
+
+This is a reminder that your EMI payment for {{ emi.name }} is due on {{ due_date|date:"F j, Y" }}.
+
+Payment Amount: ₹{{ amount|floatformat:2 }}
+
+Please ensure that sufficient funds are available in your account.
+
+View details at: {{ dashboard_url }}
+
+Best regards,
+DhanBuddy Team
